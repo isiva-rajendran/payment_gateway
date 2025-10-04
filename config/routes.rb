@@ -11,5 +11,28 @@ Rails.application.routes.draw do
   # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
 
   # Defines the root path route ("/")
-  # root "posts#index"
+  root "subscriptions#index"
+
+  # Subscription routes
+  resources :subscriptions, only: [:index, :new, :create, :destroy] do
+    collection do
+      get 'success'
+      get 'cancel'
+    end
+  end
+
+  # Dashboard routes
+  namespace :dashboard do
+    get 'index'
+    get 'payment_history'
+    get 'subscription_details'
+  end
+
+  # Webhook routes
+  post '/webhooks/paypal', to: 'webhooks#paypal'
+  
+  # Direct routes for convenience
+  get 'dashboard', to: 'dashboard#index'
+  get 'payment_history', to: 'dashboard#payment_history'
+  get 'subscription_details', to: 'dashboard#subscription_details'
 end

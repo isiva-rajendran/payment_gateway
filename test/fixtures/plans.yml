@@ -1,0 +1,21 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  name: MyString
+  duration_months: 1
+  plan_type: MyString
+  price: 9.99
+  paypal_plan_id: MyString
+  description: MyText
+  active: false
+  billing_cycle_type: MyString
+
+two:
+  name: MyString
+  duration_months: 1
+  plan_type: MyString
+  price: 9.99
+  paypal_plan_id: MyString
+  description: MyText
+  active: false
+  billing_cycle_type: MyString

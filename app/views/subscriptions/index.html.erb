@@ -1,0 +1,144 @@
+<!-- app/views/subscriptions/index.html.erb -->
+<div class="container mx-auto px-4 py-8">
+  <div class="row">
+    <div class="col-12">
+      <h1 class="text-center mb-5">Choose Your Subscription Plan</h1>
+      
+      <% if current_user.has_active_subscription? %>
+        <div class="alert alert-info">
+          You currently have an active <strong><%= current_user.current_plan.display_name %></strong> subscription.
+          <%= link_to 'View Subscription Details', dashboard_subscription_details_path, class: 'btn btn-sm btn-outline-primary ms-2' %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <% @plans_by_duration.each do |duration, plans| %>
+    <div class="flex space-x-6">
+      <!-- Basic Plan -->
+      <div class="bg-white p-6 rounded-lg shadow-lg w-64 text-center">
+        <h2 class="text-xl font-bold text-gray-800">BASIC</h2>
+        <p class="text-3xl font-bold text-teal-600 mt-4">$10/mo</p>
+        <ul class="mt-4 space-y-2 text-gray-600">
+          <li class="flex items-center"><span class="text-teal-500 mr-2">✔</span> 5 Users</li>
+          <li class="flex items-center"><span class="text-teal-500 mr-2">✔</span> 1GB Storage</li>
+          <li class="flex items-center"><span class="text-teal-500 mr-2">✔</span> Email Support</li>
+        </ul>
+        <button class="mt-6 w-full bg-gray-200 text-gray-800 py-2 rounded hover:bg-gray-300">Sign Up</button>
+      </div>
+
+      <!-- Pro Plan -->
+      <div class="bg-white p-6 rounded-lg shadow-lg w-64 text-center relative">
+        <span class="bg-teal-500 text-white text-xs font-semibold px-2 py-1 rounded absolute top-2 right-2">POPULAR</span>
+        <h2 class="text-xl font-bold text-gray-800">PRO</h2>
+        <p class="text-3xl font-bold text-teal-600 mt-4">$29/mo</p>
+        <ul class="mt-4 space-y-2 text-gray-600">
+          <li class="flex items-center"><span class="text-teal-500 mr-2">✔</span> Unlimited Users</li>
+          <li class="flex items-center"><span class="text-teal-500 mr-2">✔</span> 100GB Storage</li>
+          <li class="flex items-center"><span class="text-teal-500 mr-2">✔</span> Priority Support</li>
+        </ul>
+        <button class="mt-6 w-full bg-teal-500 text-white py-2 rounded hover:bg-teal-600">Start Trial</button>
+      </div>
+
+      <!-- Enterprise Plan -->
+      <div class="bg-white p-6 rounded-lg shadow-lg w-64 text-center">
+        <h2 class="text-xl font-bold text-gray-800">ENTERPRISE</h2>
+        <p class="text-3xl font-bold text-teal-600 mt-4">$99/mo</p>
+        <ul class="mt-4 space-y-2 text-gray-600">
+          <li class="flex items-center"><span class="text-teal-500 mr-2">✔</span> Everything in Pro</li>
+          <li class="flex items-center"><span class="text-teal-500 mr-2">✔</span> Dedicated Support</li>
+          <li class="flex items-center"><span class="text-teal-500 mr-2">✔</span> Custom Integrations</li>
+        </ul>
+        <button class="mt-6 w-full bg-teal-500 text-white py-2 rounded hover:bg-teal-600">Contact Sales</button>
+      </div>
+    </div>
+    <div class="row mb-5">
+      <div class="col-12">
+        <h3 class="text-center mb-4"><%= duration %> Month<%= duration > 1 ? 's' : '' %> Plan</h3>
+      </div>
+      
+      <% plans.each do |plan| %>
+        <div class="col-md-4 mb-4">
+          <div class="card h-100">
+            <div class="card-header text-center bg-primary text-white">
+              <h4 class="my-2"><%= plan.plan_type.capitalize %></h4>
+            </div>
+            <div class="card-body d-flex flex-column">
+              <h2 class="card-title text-center">$<%= plan.price %></h2>
+              <p class="text-center text-muted">
+                <%= number_to_currency(plan.monthly_price) %> per month
+              </p>
+              
+              <ul class="list-unstyled mt-3 mb-4">
+                <li class="mb-2">
+                  <i class="fas fa-check text-success me-2"></i>
+                  <%= plan.duration_months %> month access
+                </li>
+                <li class="mb-2">
+                  <i class="fas fa-check text-success me-2"></i>
+                  <%= plan.plan_type.capitalize %> features
+                </li>
+                <li class="mb-2">
+                  <i class="fas fa-check text-success me-2"></i>
+                  Priority support
+                </li>
+              </ul>
+              
+              <div class="mt-auto">
+                <% if plan.paypal_plan_id.present? %>
+                  <%= link_to 'Subscribe (Recurring)', 
+                      new_subscription_path(plan_id: plan.id, recurring: true), 
+                      class: 'btn btn-primary w-100 mb-2' %>
+                <% end %>
+                
+                <%= link_to 'One Time Payment', 
+                    new_subscription_path(plan_id: plan.id, recurring: false), 
+                    class: 'btn btn-outline-primary w-100' %>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+</div>
+
+
+  <div class="flex space-x-6">
+    <!-- Basic Plan -->
+    <div class="bg-white p-6 rounded-lg shadow-lg w-64 text-center">
+      <h2 class="text-xl font-bold text-gray-800">BASIC</h2>
+      <p class="text-3xl font-bold text-teal-600 mt-4">$10/mo</p>
+      <ul class="mt-4 space-y-2 text-gray-600">
+        <li class="flex items-center"><span class="text-teal-500 mr-2">✔</span> 5 Users</li>
+        <li class="flex items-center"><span class="text-teal-500 mr-2">✔</span> 1GB Storage</li>
+        <li class="flex items-center"><span class="text-teal-500 mr-2">✔</span> Email Support</li>
+      </ul>
+      <button class="mt-6 w-full bg-gray-200 text-gray-800 py-2 rounded hover:bg-gray-300">Sign Up</button>
+    </div>
+
+    <!-- Pro Plan -->
+    <div class="bg-white p-6 rounded-lg shadow-lg w-64 text-center relative">
+      <span class="bg-teal-500 text-white text-xs font-semibold px-2 py-1 rounded absolute top-2 right-2">POPULAR</span>
+      <h2 class="text-xl font-bold text-gray-800">PRO</h2>
+      <p class="text-3xl font-bold text-teal-600 mt-4">$29/mo</p>
+      <ul class="mt-4 space-y-2 text-gray-600">
+        <li class="flex items-center"><span class="text-teal-500 mr-2">✔</span> Unlimited Users</li>
+        <li class="flex items-center"><span class="text-teal-500 mr-2">✔</span> 100GB Storage</li>
+        <li class="flex items-center"><span class="text-teal-500 mr-2">✔</span> Priority Support</li>
+      </ul>
+      <button class="mt-6 w-full bg-teal-500 text-white py-2 rounded hover:bg-teal-600">Start Trial</button>
+    </div>
+
+    <!-- Enterprise Plan -->
+    <div class="bg-white p-6 rounded-lg shadow-lg w-64 text-center">
+      <h2 class="text-xl font-bold text-gray-800">ENTERPRISE</h2>
+      <p class="text-3xl font-bold text-teal-600 mt-4">$99/mo</p>
+      <ul class="mt-4 space-y-2 text-gray-600">
+        <li class="flex items-center"><span class="text-teal-500 mr-2">✔</span> Everything in Pro</li>
+        <li class="flex items-center"><span class="text-teal-500 mr-2">✔</span> Dedicated Support</li>
+        <li class="flex items-center"><span class="text-teal-500 mr-2">✔</span> Custom Integrations</li>
+      </ul>
+      <button class="mt-6 w-full bg-teal-500 text-white py-2 rounded hover:bg-teal-600">Contact Sales</button>
+    </div>
+  </div>

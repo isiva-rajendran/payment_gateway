@@ -1,0 +1,27 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  user: one
+  plan: one
+  status: MyString
+  paypal_subscription_id: MyString
+  current_period_start: 2025-09-28 14:50:35
+  current_period_end: 2025-09-28 14:50:35
+  canceled_at: 2025-09-28 14:50:35
+  auto_renew: false
+  next_payment_attempt: 2025-09-28 14:50:35
+  retry_count: 1
+  paypal_payer_id: MyString
+
+two:
+  user: two
+  plan: two
+  status: MyString
+  paypal_subscription_id: MyString
+  current_period_start: 2025-09-28 14:50:35
+  current_period_end: 2025-09-28 14:50:35
+  canceled_at: 2025-09-28 14:50:35
+  auto_renew: false
+  next_payment_attempt: 2025-09-28 14:50:35
+  retry_count: 1
+  paypal_payer_id: MyString

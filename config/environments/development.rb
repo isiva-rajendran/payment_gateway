@@ -25,6 +25,12 @@ Rails.application.configure do
     config.action_controller.perform_caching = false
   end
 
+  config.hosts << "uneschewed-zahra-rumbly.ngrok-free.dev"
+
+  Rails.application.routes.default_url_options = {
+    host: 'uneschewed-zahra-rumbly.ngrok-free.dev',
+    protocol: 'https'
+  }
   # Change to :null_store to avoid any caching.
   config.cache_store = :memory_store
 
