@@ -70,6 +70,7 @@ class WebhooksController < ApplicationController
       paypal_payment_id: resource["id"],
       status: 'completed',
       payment_method: 'paypal_recurring_auto',
+      auto_renew: true,
       payment_date: Time.parse(resource["create_time"])
     )
 

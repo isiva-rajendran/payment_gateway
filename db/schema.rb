@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_28_092101) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_05_121602) do
   create_table "payments", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.bigint "plan_id", null: false
@@ -46,6 +46,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_28_092101) do
     t.string "billing_cycle_type", default: "monthly"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "paypal_product_id"
     t.index ["duration_months", "plan_type"], name: "index_plans_on_duration_months_and_plan_type", unique: true
     t.index ["paypal_plan_id"], name: "index_plans_on_paypal_plan_id"
   end

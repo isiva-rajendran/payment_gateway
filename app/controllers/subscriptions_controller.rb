@@ -10,30 +10,12 @@ class SubscriptionsController < ApplicationController
   end
 
   def new
-    session.delete(:pending_payment)
-    # Only create order if nothing pending in session
-    unless session[:pending_payment]
-      paypal_service = PaypalService.new
-      return_url = success_subscriptions_url
-      cancel_url = cancel_subscriptions_url
+    @is_recurring = params[:recurring] == "false"
 
-      response = paypal_service.create_order(@plan.price, return_url, cancel_url)
-      if response["status"] == "CREATED"
-        session[:pending_payment] = {
-          plan_id: @plan.id,
-          paypal_order_id: response["id"]
-        }
-        approval_url = response["links"].find { |link| link["rel"] == "approve" }&.dig("href")
-        if approval_url
-          redirect_to approval_url, allow_other_host: true and return
-        end
-      end
-      flash[:alert] = "Failed to initiate PayPal payment"
-      redirect_to subscriptions_path
+    if @is_recurring
+      create_recurring_subscription
     else
-      # If already pending, either redirect back or clear session for user to retry
-      flash[:alert] = "Payment already initiated, please complete or cancel before trying again."
-      redirect_to subscriptions_path
+      create_one_time_payment
     end
   end
 
@@ -58,11 +40,11 @@ class SubscriptionsController < ApplicationController
 
     paypal_service = PaypalService.new
     begin
-      response = paypal_service.capture_order(pending_data['paypal_order_id'])
-      plan = Plan.find(pending_data['plan_id'])
+      response = paypal_service.capture_order(pending_data["paypal_order_id"])
+      plan = Plan.find(pending_data["plan_id"])
       if response["status"] == "COMPLETED"
         subscription = current_user.subscriptions.create!(
-          plan_id: pending_data['plan_id'],
+          plan_id: pending_data["plan_id"],
           status: "active",
           current_period_start: Time.current,
           current_period_end: Time.current + plan.duration_months.months,
@@ -129,13 +111,32 @@ class SubscriptionsController < ApplicationController
     end
 
     paypal_service = PaypalService.new
-    return_url = "https://uneschewed-zahra-rumbly.ngrok-free.dev/subscriptions/success"
-    cancel_url = "https://uneschewed-zahra-rumbly.ngrok-free.dev/subscriptions/cancel"
+    return_url = success_subscriptions_url
+    cancel_url = cancel_subscriptions_url
 
-    unless @plan.paypal_plan_id.present?
-      flash[:alert] = "This plan is not configured for recurring payments."
-      redirect_to subscriptions_path
-      return
+    if @plan.paypal_product_id.blank?
+      begin
+        paypal_product_id = paypal_service.create_product(
+          name: @plan.name,
+          description: @plan.description || @plan.name
+        )
+        @plan.update!(paypal_product_id: paypal_product_id)
+      rescue => e
+        Rails.logger.error "Failed to create PayPal product: #{e.message}"
+        flash[:alert] = "Error creating PayPal product: #{e.message}"
+        redirect_to subscriptions_path and return
+      end
+    end
+
+    if @plan.paypal_plan_id.blank?
+      begin
+        paypal_plan_id = paypal_service.create_billing_plan(@plan)
+        @plan.update!(paypal_plan_id: paypal_plan_id)
+      rescue => e
+        Rails.logger.error "Failed to create PayPal billing plan: #{e.message}"
+        flash[:alert] = "Error creating PayPal billing plan: #{e.message}"
+        redirect_to subscriptions_path and return
+      end
     end
 
     begin
@@ -183,7 +184,6 @@ class SubscriptionsController < ApplicationController
     paypal_service = PayPalService.new
 
     begin
-      # Capture the subscription
       response = paypal_service.capture_subscription(pending_data[:paypal_subscription_id])
 
       if response["status"] == "ACTIVE"
@@ -221,43 +221,31 @@ class SubscriptionsController < ApplicationController
   end
 
   def create_one_time_payment
-    unless paypal_configured?
-      flash[:alert] = "PayPal is not configured. Please contact administrator."
-      redirect_to subscriptions_path
-      return
-    end
+    session.delete(:pending_payment)
+    unless session[:pending_payment]
+      paypal_service = PaypalService.new
+      return_url = success_subscriptions_url
+      cancel_url = cancel_subscriptions_url
 
-    paypal_service = PaypalService.new
-    return_url = "https://uneschewed-zahra-rumbly.ngrok-free.dev/subscriptions/success"
-    cancel_url = "https://uneschewed-zahra-rumbly.ngrok-free.dev/subscriptions/cancel"
-
-    response = paypal_service.create_order(@plan.price, return_url, cancel_url)
-
-    if response["status"] == "CREATED"
-      session[:pending_payment] = {
-        plan_id: @plan.id,
-        paypal_order_id: response["id"]
-      }
-
-      approval_url = response["links"].find { |link| link["rel"] == "approve" }&.dig("href")
-
-      if approval_url
-        redirect_to approval_url, allow_other_host: true
-      else
-        flash[:alert] = "Failed to get approval URL from PayPal."
-        redirect_to subscriptions_path
+      response = paypal_service.create_order(@plan.price, return_url, cancel_url)
+      if response["status"] == "CREATED"
+        session[:pending_payment] = {
+          plan_id: @plan.id,
+          paypal_order_id: response["id"]
+        }
+        approval_url = response["links"].find { |link| link["rel"] == "approve" }&.dig("href")
+        if approval_url
+          redirect_to approval_url, allow_other_host: true and return
+        end
       end
+      flash[:alert] = "Failed to initiate PayPal payment"
+      redirect_to subscriptions_path
     else
-      error_message = response["message"] || response["error"] || "Unknown error"
-      flash[:alert] = "Failed to create payment order: #{error_message}"
+      # If already pending, either redirect back or clear session for user to retry
+      flash[:alert] = "Payment already initiated, please complete or cancel before trying again."
       redirect_to subscriptions_path
     end
-  rescue => e
-    Rails.logger.error "Error creating one-time payment: #{e.message}"
-    flash[:alert] = "Error creating payment: #{e.message}"
-    redirect_to subscriptions_path
   end
-
 
   def complete_one_time_payment
     pending_data = session[:pending_payment]

@@ -8,7 +8,7 @@ class DashboardController < ApplicationController
   end
 
   def payment_history
-    @payments = current_user.payments.recent.page(params[:page]).per(10)
+    # @payments = current_user.payments.recent.page(params[:page]).per(10)
   end
 
   def subscription_details

@@ -58,6 +58,86 @@ class PaypalService
     handle_response(response)
   end
 
+  def create_product(name:, description:)
+    uri = URI.parse("#{@base_url}/v1/catalogs/products")
+    http = Net::HTTP.new(uri.host, uri.port)
+    http.use_ssl = true
+
+    request = Net::HTTP::Post.new(uri.path)
+    request['Content-Type'] = 'application/json'
+    request['Authorization'] = "Bearer #{@access_token}"
+    request['Prefer'] = 'return=representation'
+
+    request_body = {
+      name: name,
+      description: description,
+      type: 'SERVICE',
+      category: 'SOFTWARE'
+    }
+
+    request.body = request_body.to_json
+    Rails.logger.info "Creating PayPal product with: #{request_body}"
+
+    response = http.request(request)
+    result = handle_response(response)
+
+    result['id'] # PayPal product ID
+  end
+
+  def create_billing_plan(plan)
+    raise PayPalError, "Plan missing PayPal product ID" unless plan.paypal_product_id.present?
+
+    uri = URI.parse("#{@base_url}/v1/billing/plans")
+    http = Net::HTTP.new(uri.host, uri.port)
+    http.use_ssl = true
+
+    request = Net::HTTP::Post.new(uri.path)
+    request['Content-Type'] = 'application/json'
+    request['Authorization'] = "Bearer #{@access_token}"
+    request['Prefer'] = 'return=representation'
+
+    interval_unit = plan.billing_cycle_type.upcase
+    interval_unit = "MONTH" if interval_unit == "MONTHLY" # Fix interval unit for PayPal
+
+    request_body = {
+      product_id: plan.paypal_product_id,
+      name: "#{plan.name} Subscription",
+      description: plan.description || "#{plan.name} Plan",
+      billing_cycles: [
+        {
+          frequency: {
+            interval_unit: interval_unit,
+            interval_count: plan.duration_months || 1
+          },
+          tenure_type: "REGULAR",
+          sequence: 1,
+          total_cycles: 0,
+          pricing_scheme: {
+            fixed_price: {
+              value: format('%.2f', plan.price),
+              currency_code: "USD"
+            }
+          }
+        }
+      ],
+      payment_preferences: {
+        auto_bill_outstanding: true,
+        setup_fee: { value: "0", currency_code: "USD" },
+        setup_fee_failure_action: "CONTINUE",
+        payment_failure_threshold: 3
+      }
+    }
+
+    request.body = request_body.to_json
+    Rails.logger.info "Creating billing plan on PayPal: #{request_body}"
+    response = http.request(request)
+
+    result = handle_response(response)
+
+    result['id']
+  end
+
+
   # Create a recurring subscription
   def create_subscription(plan, user, return_url, cancel_url)
     raise PayPalError, "Plan missing PayPal plan ID" unless plan.paypal_plan_id.present?

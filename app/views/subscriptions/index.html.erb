@@ -1,144 +1,282 @@
-<!-- app/views/subscriptions/index.html.erb -->
-<div class="container mx-auto px-4 py-8">
-  <div class="row">
-    <div class="col-12">
-      <h1 class="text-center mb-5">Choose Your Subscription Plan</h1>
-      
+<body class="bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 min-h-screen py-12 px-4">
+  <div class="max-w-7xl mx-auto" data-controller="pricing">
+      <!-- Header -->
+      <div class="text-center mb-8 float-animation">
+          <h1 class="text-5xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">
+              Choose Your Plan
+          </h1>
+          <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+              Select the perfect plan for your needs. Upgrade or downgrade anytime.
+          </p>
+      </div>
+
       <% if current_user.has_active_subscription? %>
-        <div class="alert alert-info">
-          You currently have an active <strong><%= current_user.current_plan.display_name %></strong> subscription.
-          <%= link_to 'View Subscription Details', dashboard_subscription_details_path, class: 'btn btn-sm btn-outline-primary ms-2' %>
-        </div>
-      <% end %>
-    </div>
-  </div>
-
-  <% @plans_by_duration.each do |duration, plans| %>
-    <div class="flex space-x-6">
-      <!-- Basic Plan -->
-      <div class="bg-white p-6 rounded-lg shadow-lg w-64 text-center">
-        <h2 class="text-xl font-bold text-gray-800">BASIC</h2>
-        <p class="text-3xl font-bold text-teal-600 mt-4">$10/mo</p>
-        <ul class="mt-4 space-y-2 text-gray-600">
-          <li class="flex items-center"><span class="text-teal-500 mr-2">✔</span> 5 Users</li>
-          <li class="flex items-center"><span class="text-teal-500 mr-2">✔</span> 1GB Storage</li>
-          <li class="flex items-center"><span class="text-teal-500 mr-2">✔</span> Email Support</li>
-        </ul>
-        <button class="mt-6 w-full bg-gray-200 text-gray-800 py-2 rounded hover:bg-gray-300">Sign Up</button>
-      </div>
-
-      <!-- Pro Plan -->
-      <div class="bg-white p-6 rounded-lg shadow-lg w-64 text-center relative">
-        <span class="bg-teal-500 text-white text-xs font-semibold px-2 py-1 rounded absolute top-2 right-2">POPULAR</span>
-        <h2 class="text-xl font-bold text-gray-800">PRO</h2>
-        <p class="text-3xl font-bold text-teal-600 mt-4">$29/mo</p>
-        <ul class="mt-4 space-y-2 text-gray-600">
-          <li class="flex items-center"><span class="text-teal-500 mr-2">✔</span> Unlimited Users</li>
-          <li class="flex items-center"><span class="text-teal-500 mr-2">✔</span> 100GB Storage</li>
-          <li class="flex items-center"><span class="text-teal-500 mr-2">✔</span> Priority Support</li>
-        </ul>
-        <button class="mt-6 w-full bg-teal-500 text-white py-2 rounded hover:bg-teal-600">Start Trial</button>
-      </div>
-
-      <!-- Enterprise Plan -->
-      <div class="bg-white p-6 rounded-lg shadow-lg w-64 text-center">
-        <h2 class="text-xl font-bold text-gray-800">ENTERPRISE</h2>
-        <p class="text-3xl font-bold text-teal-600 mt-4">$99/mo</p>
-        <ul class="mt-4 space-y-2 text-gray-600">
-          <li class="flex items-center"><span class="text-teal-500 mr-2">✔</span> Everything in Pro</li>
-          <li class="flex items-center"><span class="text-teal-500 mr-2">✔</span> Dedicated Support</li>
-          <li class="flex items-center"><span class="text-teal-500 mr-2">✔</span> Custom Integrations</li>
-        </ul>
-        <button class="mt-6 w-full bg-teal-500 text-white py-2 rounded hover:bg-teal-600">Contact Sales</button>
-      </div>
-    </div>
-    <div class="row mb-5">
-      <div class="col-12">
-        <h3 class="text-center mb-4"><%= duration %> Month<%= duration > 1 ? 's' : '' %> Plan</h3>
-      </div>
-      
-      <% plans.each do |plan| %>
-        <div class="col-md-4 mb-4">
-          <div class="card h-100">
-            <div class="card-header text-center bg-primary text-white">
-              <h4 class="my-2"><%= plan.plan_type.capitalize %></h4>
-            </div>
-            <div class="card-body d-flex flex-column">
-              <h2 class="card-title text-center">$<%= plan.price %></h2>
-              <p class="text-center text-muted">
-                <%= number_to_currency(plan.monthly_price) %> per month
-              </p>
-              
-              <ul class="list-unstyled mt-3 mb-4">
-                <li class="mb-2">
-                  <i class="fas fa-check text-success me-2"></i>
-                  <%= plan.duration_months %> month access
-                </li>
-                <li class="mb-2">
-                  <i class="fas fa-check text-success me-2"></i>
-                  <%= plan.plan_type.capitalize %> features
-                </li>
-                <li class="mb-2">
-                  <i class="fas fa-check text-success me-2"></i>
-                  Priority support
-                </li>
-              </ul>
-              
-              <div class="mt-auto">
-                <% if plan.paypal_plan_id.present? %>
-                  <%= link_to 'Subscribe (Recurring)', 
-                      new_subscription_path(plan_id: plan.id, recurring: true), 
-                      class: 'btn btn-primary w-100 mb-2' %>
-                <% end %>
-                
-                <%= link_to 'One Time Payment', 
-                    new_subscription_path(plan_id: plan.id, recurring: false), 
-                    class: 'btn btn-outline-primary w-100' %>
-              </div>
-            </div>
+          <div class="bg-indigo-50 border border-indigo-200 text-indigo-800 p-4 mb-10 rounded-lg flex items-center justify-between">
+          <span>
+              You currently have an active 
+              <strong><%= current_user.current_plan %></strong> subscription.
+          </span>
+          <%= link_to 'View Details', dashboard_subscription_details_path, 
+              class: 'text-indigo-700 hover:underline font-medium' %>
           </div>
-        </div>
+
+          <div id="modal" class="modal-overlay fixed inset-0 bg-opacity-50 flex items-center justify-center z-50 p-4">
+              <!-- Modal Content -->
+              <div class="modal-content bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
+                  <!-- Header with gradient background -->
+                  <div class="bg-gradient-to-r from-purple-600 to-blue-600 p-6 text-white relative overflow-hidden">
+                      <div class="absolute top-0 right-0 w-40 h-40 bg-white opacity-10 rounded-full -mr-20 -mt-20"></div>
+                      <div class="absolute bottom-0 left-0 w-32 h-32 bg-white opacity-10 rounded-full -ml-16 -mb-16"></div>
+
+                      <div class="relative z-10">
+                          <div class="flex items-center justify-between mb-2">
+                              <h2 class="text-2xl font-bold">Your Active Plan</h2>
+                              <button onclick="closeModal()" class="text-white hover:text-gray-200 transition-colors">
+                                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                  </svg>
+                              </button>
+                          </div>
+                          <p class="text-purple-100 text-sm">Thank you for being a valued member</p>
+                      </div>
+                  </div>
+
+                  <!-- Plan Details -->
+                  <div class="p-6">
+                      <!-- Plan Badge -->
+                      <div class="flex justify-center mb-6">
+                          <span class="badge-shimmer text-white px-6 py-2 rounded-full text-sm font-semibold inline-flex items-center gap-2">
+                              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                              </svg>
+                              Premium Plan
+                          </span>
+                      </div>
+
+                      <!-- Price -->
+                      <div class="text-center mb-6">
+                          <div class="text-5xl font-bold text-gray-800 mb-2">$29.99</div>
+                          <div class="text-gray-500">per month</div>
+                      </div>
+
+                      <!-- Features -->
+                      <div class="space-y-4 mb-6">
+                          <div class="flex items-start gap-3">
+                              <div class="flex-shrink-0 w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mt-0.5">
+                                  <svg class="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                  </svg>
+                              </div>
+                              <div>
+                                  <div class="font-semibold text-gray-800">Unlimited Access</div>
+                                  <div class="text-sm text-gray-600">Full access to all premium features</div>
+                              </div>
+                          </div>
+
+                          <div class="flex items-start gap-3">
+                              <div class="flex-shrink-0 w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mt-0.5">
+                                  <svg class="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                  </svg>
+                              </div>
+                              <div>
+                                  <div class="font-semibold text-gray-800">Priority Support</div>
+                                  <div class="text-sm text-gray-600">24/7 dedicated customer support</div>
+                              </div>
+                          </div>
+
+                          <div class="flex items-start gap-3">
+                              <div class="flex-shrink-0 w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mt-0.5">
+                                  <svg class="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                  </svg>
+                              </div>
+                              <div>
+                                  <div class="font-semibold text-gray-800">Advanced Analytics</div>
+                                  <div class="text-sm text-gray-600">Detailed insights and reporting</div>
+                              </div>
+                          </div>
+                      </div>
+
+                      <!-- Status -->
+                      <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+                          <div class="flex items-center gap-2 text-green-800">
+                              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                              </svg>
+                              <span class="font-semibold">Active until December 11, 2025</span>
+                          </div>
+                      </div>
+
+                      <!-- Action Buttons -->
+                      <div class="flex gap-3">
+                          <button onclick="manageSubscription()" class="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 text-white py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700 transition-all transform hover:scale-105">
+                              Manage Plan
+                          </button>
+                          <button onclick="closeModal()" class="flex-1 bg-gray-100 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-200 transition-colors">
+                              Close
+                          </button>
+                      </div>
+                  </div>
+              </div>
+          </div>
       <% end %>
-    </div>
-  <% end %>
-</div>
 
+      <!-- Billing Period Toggle -->
+      <div class="flex justify-center mb-12">
+          <div class="inline-flex bg-white rounded-2xl p-2 shadow-lg border border-gray-100">
+              <% @plans_by_duration.keys.each_with_index do |duration, index| %>
+                  <button 
+                      data-action="click->pricing#changePeriod"
+                      data-pricing-duration-param="<%= duration %>"
+                      data-pricing-target="periodButton"
+                      class="period-btn px-6 py-3 rounded-xl font-semibold transition-all duration-300 <%= index == 0 ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md' : 'text-gray-600 hover:text-gray-900' %>">
+                      <%= duration == 1 ? 'Monthly' : "#{duration} Months" %>
+                      <% if duration > 1 %>
+                          <span class="ml-2 text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
+                              Save <%= calculate_discount_percentage(duration) %>%
+                          </span>
+                      <% end %>
+                  </button>
+              <% end %>
+          </div>
+      </div>
 
-  <div class="flex space-x-6">
-    <!-- Basic Plan -->
-    <div class="bg-white p-6 rounded-lg shadow-lg w-64 text-center">
-      <h2 class="text-xl font-bold text-gray-800">BASIC</h2>
-      <p class="text-3xl font-bold text-teal-600 mt-4">$10/mo</p>
-      <ul class="mt-4 space-y-2 text-gray-600">
-        <li class="flex items-center"><span class="text-teal-500 mr-2">✔</span> 5 Users</li>
-        <li class="flex items-center"><span class="text-teal-500 mr-2">✔</span> 1GB Storage</li>
-        <li class="flex items-center"><span class="text-teal-500 mr-2">✔</span> Email Support</li>
-      </ul>
-      <button class="mt-6 w-full bg-gray-200 text-gray-800 py-2 rounded hover:bg-gray-300">Sign Up</button>
-    </div>
+      <!-- Pricing Cards Container - All cards pre-rendered -->
+      <div class="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto" data-pricing-target="cardsContainer">
+          <% @plans_by_duration.each do |duration, plans| %>
+              <% plans.each do |plan| %>
+                  <div class="plan-card hidden" 
+                        data-duration="<%= duration %>"
+                        data-plan-type="<%= plan.plan_type %>"
+                        data-pricing-target="card">
 
-    <!-- Pro Plan -->
-    <div class="bg-white p-6 rounded-lg shadow-lg w-64 text-center relative">
-      <span class="bg-teal-500 text-white text-xs font-semibold px-2 py-1 rounded absolute top-2 right-2">POPULAR</span>
-      <h2 class="text-xl font-bold text-gray-800">PRO</h2>
-      <p class="text-3xl font-bold text-teal-600 mt-4">$29/mo</p>
-      <ul class="mt-4 space-y-2 text-gray-600">
-        <li class="flex items-center"><span class="text-teal-500 mr-2">✔</span> Unlimited Users</li>
-        <li class="flex items-center"><span class="text-teal-500 mr-2">✔</span> 100GB Storage</li>
-        <li class="flex items-center"><span class="text-teal-500 mr-2">✔</span> Priority Support</li>
-      </ul>
-      <button class="mt-6 w-full bg-teal-500 text-white py-2 rounded hover:bg-teal-600">Start Trial</button>
-    </div>
+                      <!-- Card content with dynamic data -->
+                      <% is_popular = plan.plan_type == 'advanced' %>
+                      <% card_class = "group relative rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-all duration-500 border hover:-translate-y-2" %>
+                      <% badge_class = "text-white text-sm font-semibold px-4 py-2 rounded-full shadow-lg" %>
+                      <% button_class = "w-full text-white font-semibold p-4 rounded-xl hover:shadow-lg hover:scale-105 transition-all duration-300" %>
 
-    <!-- Enterprise Plan -->
-    <div class="bg-white p-6 rounded-lg shadow-lg w-64 text-center">
-      <h2 class="text-xl font-bold text-gray-800">ENTERPRISE</h2>
-      <p class="text-3xl font-bold text-teal-600 mt-4">$99/mo</p>
-      <ul class="mt-4 space-y-2 text-gray-600">
-        <li class="flex items-center"><span class="text-teal-500 mr-2">✔</span> Everything in Pro</li>
-        <li class="flex items-center"><span class="text-teal-500 mr-2">✔</span> Dedicated Support</li>
-        <li class="flex items-center"><span class="text-teal-500 mr-2">✔</span> Custom Integrations</li>
-      </ul>
-      <button class="mt-6 w-full bg-teal-500 text-white py-2 rounded hover:bg-teal-600">Contact Sales</button>
-    </div>
+                      <% if is_popular %>
+                          <% card_class += " bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 shadow-2xl hover:shadow-indigo-500/50 transform hover:scale-105 border-4 border-white" %>
+                          <% badge_class += " bg-gradient-to-r from-yellow-400 to-orange-500 font-bold px-6 py-2 shadow-xl animate-pulse" %>
+                          <% button_class = "w-full bg-white text-purple-600 font-bold p-4 rounded-xl hover:shadow-2xl hover:scale-105 transition-all duration-300" %>
+                      <% else %>
+                          <% card_class += " bg-white border-gray-100 hover:border-#{plan.plan_type == 'premium' ? 'purple' : 'indigo'}-200" %>
+                          <% badge_class += " bg-gradient-to-r #{plan.plan_type == 'premium' ? 'from-purple-500 to-pink-500' : 'from-blue-500 to-cyan-500'}" %>
+                          <% button_class += " bg-gradient-to-r #{plan.plan_type == 'premium' ? 'from-purple-500 to-pink-500' : 'from-blue-500 to-cyan-500'}" %>
+                      <% end %>
+
+                      <div class="<%= card_class %>">
+                          <!-- Badge -->
+                          <% if is_popular %>
+                              <div class="absolute -top-4 left-1/3 -translate-x-1/2">
+                                  <span class="<%= badge_class %>">
+                                      ⭐ MOST POPULAR
+                                  </span>
+                              </div>
+                          <% else %>
+                              <div class="absolute -top-4 left-8">
+                                  <span class="<%= badge_class %>">
+                                      <%= plan.plan_type.capitalize %>
+                                  </span>
+                              </div>
+                          <% end %>
+
+                          <!-- Price Section -->
+                          <div class="mt-8">
+                              <div class="flex items-baseline gap-2 mb-2">
+                                  <span class="text-5xl font-bold <%= is_popular ? 'text-white' : 'text-gray-900' %>">
+                                      $<%= plan.price %>
+                                  </span>
+                                  <span class="<%= is_popular ? 'text-indigo-100' : 'text-gray-500' %> text-lg">
+                                      /<%= duration == 1 ? 'month' : "#{duration} months" %>
+                                  </span>
+                              </div>
+                              <p class="<%= is_popular ? 'text-indigo-100' : 'text-gray-600' %> mb-2">
+                                  <%= plan_description(plan.plan_type) %>
+                              </p>
+                              <% if duration > 1 %>
+                                  <p class="text-sm <%= is_popular ? 'text-yellow-300' : 'text-green-600' %> font-medium">
+                                      💰 Save <%= calculate_discount_percentage(duration) %>% ($<%= number_with_precision(plan.price / duration, precision: 2) %>/mo)
+                                  </p>
+                              <% end %>
+                          </div>
+
+                          <!-- Features List -->
+                          <ul class="space-y-4 mb-8 mt-6">
+                              <% plan_features(plan.plan_type).each do |feature| %>
+                                  <li class="flex items-center gap-3">
+                                      <svg class="w-5 h-5 <%= is_popular ? 'text-yellow-300' : (plan.plan_type == 'premium' ? 'text-purple-500' : 'text-blue-500') %> flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                      </svg>
+                                      <span class="<%= is_popular ? 'text-white font-medium' : 'text-gray-700' %>">
+                                          <%= feature %>
+                                      </span>
+                                  </li>
+                              <% end %>
+                          </ul>
+
+                          <!-- Subscribe Button -->
+                          <% if plan.paypal_plan_id.present? %>
+                              <%= link_to 'Subscribe Now', 
+                                  new_subscription_path(plan_id: plan.id, recurring: false), 
+                                  class: button_class,
+                                  data: { turbo: false } %>
+                          <% else %>
+                              <%= link_to 'Get Started', 
+                                  new_subscription_path(plan_id: plan.id, recurring: false), 
+                                  class: button_class,
+                                  data: { turbo: false } %>
+                          <% end %>
+                      </div>
+                  </div>
+              <% end %>
+          <% end %>
+      </div>
+
+      <!-- Trust Section -->
+      <div class="text-center mt-16 space-y-4">
+          <p class="text-gray-600">🔒 All plans include 256-bit SSL encryption and GDPR compliance</p>
+          <div class="flex justify-center items-center gap-8 flex-wrap">
+              <div class="flex items-center gap-2">
+                  <svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                  </svg>
+                  <span class="text-gray-700">Cancel anytime</span>
+              </div>
+              <div class="flex items-center gap-2">
+                  <svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                  </svg>
+                  <span class="text-gray-700">No hidden fees</span>
+              </div>
+              <div class="flex items-center gap-2">
+                  <svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                  </svg>
+                  <span class="text-gray-700">Most trusted platform</span>
+              </div>
+          </div>
+      </div>
   </div>
+</body>
+
+<script>
+  function closeModal() {
+    const modal = document.getElementById('modal');
+    modal.style.opacity = '0';
+    setTimeout(() => {
+      modal.style.display = 'none';
+    }, 300);
+  }
+
+  function manageSubscription() {
+    alert('Redirecting to subscription management...');
+  }
+
+  window.addEventListener('load', () => {
+    const modal = document.getElementById('modal');
+    modal.style.display = 'flex';
+  });
+</script>
