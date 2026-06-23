@@ -32,6 +32,13 @@ class SubscriptionsController < ApplicationController
   end
 
   def success
+    # Check if this is a recurring subscription or one-time payment
+    if session[:pending_subscription].present?
+      complete_recurring_subscription
+      return
+    end
+
+    # Handle one-time payment
     pending_data = session[:pending_payment]
     unless pending_data && params[:token]
       redirect_to subscriptions_path, alert: "No pending payment found."
@@ -55,7 +62,7 @@ class SubscriptionsController < ApplicationController
           subscription: subscription,
           amount: plan.price,
           paypal_payment_id: response["id"],
-          paypal_order_id: pending_data[:paypal_order_id],
+          paypal_order_id: pending_data["paypal_order_id"],
           status: "completed",
           payment_method: "paypal_one_time",
           payment_date: Time.current
@@ -76,6 +83,7 @@ class SubscriptionsController < ApplicationController
 
   def cancel
     session.delete(:pending_payment)
+    session.delete(:pending_subscription)
     flash[:notice] = "Payment was canceled."
     redirect_to subscriptions_path
   end
@@ -181,25 +189,27 @@ class SubscriptionsController < ApplicationController
       return
     end
 
-    paypal_service = PayPalService.new
+    paypal_service = PaypalService.new
 
     begin
-      response = paypal_service.capture_subscription(pending_data[:paypal_subscription_id])
+      # Rails session converts hash keys to strings
+      plan = Plan.find(pending_data["plan_id"])
+      response = paypal_service.capture_subscription(pending_data["paypal_subscription_id"])
 
       if response["status"] == "ACTIVE"
         subscription = current_user.subscriptions.create!(
-          plan_id: pending_data[:plan_id],
-          paypal_subscription_id: pending_data[:paypal_subscription_id],
+          plan_id: pending_data["plan_id"],
+          paypal_subscription_id: pending_data["paypal_subscription_id"],
           status: "active",
           current_period_start: Time.current,
-          current_period_end: Time.current + @plan.duration_months.months,
+          current_period_end: Time.current + plan.duration_months.months,
           paypal_payer_id: response.dig("subscriber", "payer_id")
         )
 
         current_user.payments.create!(
-          plan: @plan,
+          plan: plan,
           subscription: subscription,
-          amount: @plan.price,
+          amount: plan.price,
           paypal_payment_id: response["id"],
           status: "completed",
           payment_method: "paypal_recurring",
@@ -260,23 +270,24 @@ class SubscriptionsController < ApplicationController
     paypal_service = PaypalService.new
 
     begin
-      response = paypal_service.capture_order(pending_data[:paypal_order_id])
+      plan = Plan.find(pending_data["plan_id"])
+      response = paypal_service.capture_order(pending_data["paypal_order_id"])
 
       if response["status"] == "COMPLETED"
         subscription = current_user.subscriptions.create!(
-          plan_id: pending_data[:plan_id],
+          plan_id: pending_data["plan_id"],
           status: "active",
           current_period_start: Time.current,
-          current_period_end: Time.current + @plan.duration_months.months,
+          current_period_end: Time.current + plan.duration_months.months,
           auto_renew: false
         )
 
         current_user.payments.create!(
-          plan: @plan,
+          plan: plan,
           subscription: subscription,
-          amount: @plan.price,
+          amount: plan.price,
           paypal_payment_id: response["id"],
-          paypal_order_id: pending_data[:paypal_order_id],
+          paypal_order_id: pending_data["paypal_order_id"],
           status: "completed",
           payment_method: "paypal_one_time",
           payment_date: Time.current
